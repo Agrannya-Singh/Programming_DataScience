@@ -1,15 +1,13 @@
-# Problem 12: Get input from user (Integer)
-# Created by Agrannya Singh (23BCE0965)
-
-# Function Definition
+# Function to get integer input from the user
 getintinpt <- function() {
-  user_input <- readline(prompt = "Enter an integer: ")
-  # Explicitly cast string to integer
-  integer_input <- as.integer(user_input)
-  return(integer_input)
+user_input <- readline(prompt = "Enter an integer: ")
+integer_input <- as.integer(user_input)
+return(integer_input)
 }
-
-# --- Driver Code Simulation ---
-# Simulated Output scenarios:
-# Input: "42" -> Output: 42 (Type: Integer)
-# Input: "100" -> Output: 100
+# Test the function with different sets of inputs
+cat("Test Case 1: User input is '42'\n")
+cat("User input as integer:", getintinpt(), "\n\n")
+cat("Test Case 2: User input is '100'\n")
+cat("User input as integer:", getintinpt(), "\n\n")
+cat("Test Case 3: User input is '7'\n")
+cat("User input as integer:", getintinpt(), "\n\n")

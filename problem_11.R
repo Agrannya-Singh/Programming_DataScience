@@ -1,19 +1,12 @@
-# Problem 11: Get input from user and print same
-# Created by Agrannya Singh (23BCE0965)
-
-# Function Definition
+# Function to get input from the user
 gettxtinpt <- function() {
-  # readline prompts user in the console
-  user_input <- readline(prompt = "Enter your input: ")
-  return(user_input)
+user_input <- readline(prompt = "Enter your input: ")
+return(user_input)
 }
-
-# --- Driver Code Simulation ---
-# Note: In a static report, we simulate the interaction.
-# In a real R environment, you would run:
-# val <- gettxtinpt()
-# cat("Captured Input:", val, "\n")
-
-# Simulated output description:
-# Input: "Hello, world" -> Output: "Hello, world"
-# Input: "42" -> Output: "42" (Still a string type)
+# Test the function with different sets of inputs
+cat("Test Case 1: User input is 'Hello, world!'\n")
+cat("User input:", gettxtinpt(), "\n\n")
+cat("Test Case 2: User input is '42'\n")
+cat("User input:", gettxtinpt(), "\n\n")
+cat("Test Case 3: User input is 'R programming'\n")
+cat("User input:", gettxtinpt(), "\n\n")
