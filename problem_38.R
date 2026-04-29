@@ -1,50 +1,56 @@
-# Created by Agrannya Singh (23BCE0965)
-# Problem 38: Data Integration and Analysis using Join Operations in R (Customers)
+# ============================================================
+# Lab 38 - Data Integration using Join Operations in R
+# Package: dplyr | Reg. No: 23BCE0965
+# ============================================================
 
-if (!requireNamespace('dplyr', quietly = TRUE)) install.packages('dplyr')
+if (!requireNamespace('dplyr', quietly = TRUE))
+  install.packages('dplyr')
 library(dplyr)
 
-# --- Step 1: Customers dataset ----
-Customers <- data.frame(
-  CustomerName = c('Alice', 'Bob', 'Charlie', 'Diana', 'Eve'),
-  City = c('New York', 'Los Angeles', 'Chicago', 'Houston', 'Phoenix'),
-  MemberSince = c(2018, 2019, 2020, 2017, 2021),
+# --- Step 1: Donors dataset ----
+Donors <- data.frame(
+  DonorName = c('Alice Walton','Jacqueline Mars','Maria Franca Fissolo',
+                'Susanne Klatte','Laurene Powell Jobs',
+                'Francoise Bettencourt Meyers'),
+  Email = c('alice@gmail.com','jacqueline@gmail.com','maria@gmail.com',
+            'susanne@gmail.com','laurene@gmail.com','francoise@gmail.com'),
   stringsAsFactors = FALSE)
 
-# --- Step 2: Purchases dataset ----
-Purchases <- data.frame(
-  CustomerName = c('Alice', 'Bob', 'Alice', 'Charlie', 'Frank', 'Bob'),
-  PurchaseAmount = c(250, 150, 300, 100, 200, 175),
-  Date = as.Date(c('2023-01-15', '2023-02-10', '2023-03-05',
-                    '2023-04-20', '2023-05-15', '2023-06-01')),
+# --- Step 2: Donations dataset ----
+Donations <- data.frame(
+  DonorName = c('Maria Franca Fissolo','Yang Huiyan',
+                'Maria Franca Fissolo','Alice Walton',
+                'Susanne Klatte','Yang Huiyan'),
+  Amount = c(100, 50, 75, 25, 100, 150),
+  Date = as.Date(c('2018-02-15','2018-02-15','2018-02-16',
+                    '2018-02-17','2018-02-17','2018-02-18')),
   stringsAsFactors = FALSE)
 
-cat('\n--- Customers ---\n')
-print(Customers)
-cat('\n--- Purchases ---\n')
-print(Purchases)
+cat('\n--- Donors ---\n')
+print(Donors)
+cat('\n--- Donations ---\n')
+print(Donations)
 
 # --- LEFT JOIN ----
 cat('\n=== LEFT JOIN ===\n')
-print(left_join(Customers, Purchases, by = 'CustomerName'))
+print(left_join(Donors, Donations, by = 'DonorName'))
 
 # --- RIGHT JOIN ----
 cat('\n=== RIGHT JOIN ===\n')
-print(right_join(Customers, Purchases, by = 'CustomerName'))
+print(right_join(Donors, Donations, by = 'DonorName'))
 
 # --- INNER JOIN ----
 cat('\n=== INNER JOIN ===\n')
-inner <- inner_join(Customers, Purchases, by = 'CustomerName')
+inner <- inner_join(Donors, Donations, by = 'DonorName')
 print(inner)
 
 # --- FULL OUTER JOIN ----
 cat('\n=== FULL OUTER JOIN ===\n')
-print(full_join(Customers, Purchases, by = 'CustomerName'))
+print(full_join(Donors, Donations, by = 'DonorName'))
 
-# --- Rank top spenders ----
-cat('\n=== Top Spenders (from inner join) ===\n')
+# --- Summary: total per donor ----
+cat('\n=== Total Donated per Registered Donor ===\n')
 print(inner |>
-  arrange(desc(PurchaseAmount)) |>
-  mutate(Rank = row_number()) |>
-  select(Rank, CustomerName, PurchaseAmount, Date))
-cat(sprintf('Average purchase: $%.2f\n', mean(Purchases$PurchaseAmount)))
+  group_by(DonorName) |>
+  summarise(Total = sum(Amount), Transactions = n(), .groups = 'drop') |>
+  arrange(desc(Total)))
