@@ -1,49 +1,46 @@
-# Created by Agrannya Singh (23BCE0965)
-# Problem 32: Patient Test Score Analytics Using R Data Frames
+# ============================================================
+# Lab 32 - Student Marks Analytics Using R Data Frames
+# Tool: Base R only | Reg. No: 23BCE0965
+# ============================================================
 
-# ---- 1) Create vectors ----
-PatientID <- c('P001', 'P002', 'P003', 'P004', 'P005',
-               'P006', 'P007', 'P008', 'P009', 'P010')
-Name <- c('Ramesh', 'Suresh', 'Priya', 'Anitha', 'Karthik',
-           'Divya', 'Rahul', 'Sneha', 'Vijay', 'Meena')
-Department <- c('Cardiology', 'Neurology', 'Cardiology', 'Orthopedics', 'Neurology',
-                'Orthopedics', 'Cardiology', 'Neurology', 'Orthopedics', 'Cardiology')
-Diagnosis <- c('Hypertension', 'Migraine', 'Arrhythmia', 'Fracture', 'Epilepsy',
-               'Arthritis', 'Heart Failure', 'Stroke', 'Sprain', 'Angina')
-Test1 <- c(85, 78, 92, 70, 88, 65, 90, 82, 75, 88)
-Test2 <- c(80, 82, 88, 72, 85, 70, 92, 78, 80, 85)
-Test3 <- c(88, 75, 90, 68, 82, 72, 88, 85, 78, 90)
-Test4 <- c(82, 80, 85, 75, 90, 68, 85, 80, 82, 87)
-Test3_Score <- Test3
+# --- Step 1: Define column vectors ----
+Reg.No <- c('24BCE1001','24BCE1002','24BCE1003','24BCE1004','24BCE1005',
+            '24BCE1006','24BCE1007','24BCE1008','24BCE1009','24BCE1010')
+Name <- c('Aadesh Kumar','Bhavya Reddy','Charan Iyer','Divya Sharma',
+          'Esha Nair','Farhan Khan','Gayathri Raj','Harish Kumar',
+          'Ishita Menon','Jai Verma')
+Programme <- rep('B.Tech', 10)
+Specialization <- c('CSE','AI','DS','IT','CSE','ECE','Cyber','AI','DS','IT')
+Subject1 <- c(86, 72, 90, 65, 94, 58, 77, 69, 88, 82)
+Subject2 <- c(78, 68, 88, 70, 96, 62, 81, 75, 85, 79)
+Subject3 <- c(91, 74, 85, 69, 93, 60, 79, 72, 90, 76)
+Subject4 <- c(84, 80, 92, 73, 95, 66, 83, 70, 87, 85)
 
-# ---- 2) Build data frame ----
-patients <- data.frame(
-  PatientID, Name, Department, Diagnosis,
-  Test1, Test2, Test3, Test4, Test3_Score,
-  stringsAsFactors = FALSE
-)
-str(patients)
-head(patients)
+# --- Step 2: Build data frame ----
+students <- data.frame(
+  Reg.No = Reg.No, Name = Name, Programme = Programme,
+  Specialization = Specialization,
+  Subject1 = Subject1, Subject2 = Subject2,
+  Subject3 = Subject3, Subject4 = Subject4,
+  stringsAsFactors = FALSE)
+str(students)
+print(head(students))
 
-# ---- 3) Patient-level Sum, Average, Rank ----
-test_cols <- c('Test1', 'Test2', 'Test3', 'Test4')
-patients$Sum <- rowSums(patients[, test_cols], na.rm = TRUE)
-patients$Average <- round(patients$Sum / 4, 2)
-patients$Rank <- rank(-patients$Sum, ties.method = 'min')
-# Tie note: ties.method='min' assigns the lowest rank to all tied entries
-print(patients)
-print(patients[order(patients$Rank), ])
+# --- Step 3: Compute Sum (vectorised) ----
+students$Sum <- rowSums(students[, c('Subject1','Subject2','Subject3','Subject4')])
 
-# ---- 4) Test-wise averages (overall) ----
-test_wise_avg <- colMeans(patients[, test_cols], na.rm = TRUE)
-print(round(test_wise_avg, 2))
+# --- Step 4: Average ----
+students$Average <- students$Sum / 4
 
-# ---- 5) Department-wise averages ----
-dept_avg <- aggregate(
-  patients[, test_cols],
-  by = list(Department = patients$Department),
-  FUN = function(x) round(mean(x, na.rm = TRUE), 2)
-)
-dept_avg$Overall_Average <- round(rowMeans(dept_avg[, test_cols], na.rm = TRUE), 2)
-dept_avg <- dept_avg[order(-dept_avg$Overall_Average), ]
-print(dept_avg)
+# --- Step 5: Rank (highest Sum = Rank 1) ----
+students$Rank <- rank(-students$Sum, ties.method = 'min')
+
+# --- Step 6: Print in specified column order ----
+cols <- c('Reg.No','Name','Programme','Specialization',
+          'Subject1','Subject2','Subject3','Subject4','Sum','Average','Rank')
+cat('\n=== Complete Student Marks Table ===\n')
+print(students[, cols])
+
+# --- Step 7: Sort by Rank ascending ----
+cat('\n=== Sorted by Rank ===\n')
+print(students[order(students$Rank), cols])

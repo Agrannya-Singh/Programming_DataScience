@@ -1,43 +1,84 @@
 # Created by Agrannya Singh (23BCE0965)
-# Problem 36: Student Marks Analytics Using R Data Frames
+# Problem 36: Data Manipulation and Analysis using the Starwars Dataset in R
+# (Practice Program — LA-4)
 
-# --- Step 1: Create vectors ----
-Reg.No <- c('23BCE0001', '23BCE0002', '23BCE0003', '23BCE0004', '23BCE0005',
-            '23BCE0006', '23BCE0007', '23BCE0008', '23BCE0009', '23BCE0010')
-Name <- c('Aarav', 'Bhavya', 'Chetan', 'Divya', 'Esha',
-          'Farhan', 'Gayathri', 'Harish', 'Ishita', 'Jai')
-Programme <- rep('B.Tech', 10)
-Specialization <- c('CSE', 'AI', 'DS', 'IT', 'CSE', 'ECE', 'Cyber', 'AI', 'DS', 'IT')
-Subject1 <- c(85, 78, 92, 70, 88, 65, 90, 82, 75, 88)
-Subject2 <- c(80, 82, 88, 72, 85, 70, 92, 78, 80, 85)
-Subject3 <- c(88, 75, 90, 68, 82, 72, 88, 85, 78, 90)
-Subject4 <- c(82, 80, 85, 75, 90, 68, 85, 80, 82, 87)
+if (!requireNamespace('dplyr', quietly = TRUE)) install.packages('dplyr')
+library(dplyr)
 
-# --- Step 2: Build data frame ----
-students <- data.frame(
-  Reg.No = Reg.No, Name = Name, Programme = Programme,
-  Specialization = Specialization,
-  Subject1 = Subject1, Subject2 = Subject2,
-  Subject3 = Subject3, Subject4 = Subject4,
-  stringsAsFactors = FALSE)
-str(students)
-print(head(students))
+# ---- i) Load starwars dataset (from dplyr) ----
+data('starwars', package = 'dplyr')
 
-# --- Step 3: Compute Sum (vectorised) ----
-students$Sum <- rowSums(students[, c('Subject1', 'Subject2', 'Subject3', 'Subject4')])
+# ---- ii) Display first few rows ----
+cat('=== First 6 Rows ===\n')
+head(starwars)
 
-# --- Step 4: Average ----
-students$Average <- students$Sum / 4
+# ---- iii) Summary statistics for height and mass ----
+cat('=== Summary Statistics (height, mass) ===\n')
+summary(starwars[, c('name','species','height','mass','homeworld','gender')])
 
-# --- Step 5: Rank (highest Sum = Rank 1) ----
-students$Rank <- rank(-students$Sum, ties.method = 'min')
+# ---- iv) Structure of dataset ----
+cat('=== Dataset Structure ===\n')
+str(starwars)
 
-# --- Step 6: Print in specified column order ----
-cols <- c('Reg.No', 'Name', 'Programme', 'Specialization',
-          'Subject1', 'Subject2', 'Subject3', 'Subject4', 'Sum', 'Average', 'Rank')
-cat('\n=== Complete Student Marks Table ===\n')
-print(students[, cols])
+# ---- v) Filter: Human characters only ----
+humans <- starwars[!is.na(starwars$species) & starwars$species == 'Human', ]
+cat('Human characters:', nrow(humans), '\n')
 
-# --- Step 7: Sort by Rank ascending ----
-cat('\n=== Sorted by Rank ===\n')
-print(students[order(students$Rank), cols])
+# ---- vi) Compute LMI = mass / (height/100)^2 ----
+# Note: height is in cm; convert to metres before squaring
+humans$LMI <- round(humans$mass / (humans$height / 100)^2, 2)
+cat('Human characters with LMI column:\n')
+print(humans[, c('name','homeworld','height','mass','LMI')])
+
+# ---- vii) Average LMI grouped by homeworld ----
+lmi_by_world <- aggregate(
+  LMI ~ homeworld, data = humans,
+  FUN = function(x) round(mean(x, na.rm = TRUE), 2)
+)
+lmi_by_world <- lmi_by_world[order(-lmi_by_world$LMI), ]
+cat('=== Average LMI by Homeworld ===\n')
+print(lmi_by_world)
+
+# ---- viii.a) Histogram of LMI ----
+humans_complete <- humans[!is.na(humans$LMI), ]
+hist(humans_complete$LMI,
+     breaks = 8,
+     col = 'steelblue',
+     border = 'white',
+     main = 'Histogram of LMI for Human Characters',
+     xlab = 'Lean Mass Index (LMI)',
+     ylab = 'Frequency')
+grid()
+
+# ---- viii.b) Density plot by homeworld ----
+worlds <- unique(na.omit(humans_complete$homeworld))
+cols <- rainbow(length(worlds))
+plot(
+  density(humans_complete$LMI, na.rm = TRUE),
+  main = 'LMI Density Distribution for Human Characters',
+  xlab = 'LMI', ylab = 'Density',
+  col = 'black', lwd = 2
+)
+for (i in seq_along(worlds)) {
+  sub_lmi <- humans_complete$LMI[humans_complete$homeworld == worlds[i]]
+  if (length(sub_lmi) > 1)
+    lines(density(sub_lmi), col = cols[i], lwd = 2)
+}
+legend('topright', legend = worlds, col = cols,
+       lwd = 2, title = 'Homeworld', cex = 0.7)
+
+# ---- viii.c) Bar chart: avg LMI by height bin ----
+humans_complete$HeightBin <- cut(
+  humans_complete$height,
+  breaks = c(-Inf, 150, 179, 209, Inf),
+  labels = c('Below 150','150-179','180-209','210 & above')
+)
+avg_lmi_bin <- tapply(humans_complete$LMI,
+                      humans_complete$HeightBin, mean, na.rm = TRUE)
+barplot(avg_lmi_bin,
+        col = c('lightblue','lightgreen','lightyellow','salmon'),
+        main = 'Average LMI by Height Bin (Human Characters)',
+        xlab = 'Height Bin',
+        ylab = 'Average LMI',
+        border = 'grey40')
+grid(nx = NA, ny = NULL)
