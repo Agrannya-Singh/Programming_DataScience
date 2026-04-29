@@ -1,48 +1,41 @@
-# Created by Agrannya Singh (23BCE0965)
-# Problem 46: Iris Dataset - Static and Interactive Scatter Plots
+# ─────────────────────────────────────────────────────────────────
+# Author: Agrannya Singh | Reg No: 23BCE0965
+# Lab 46 | Plant Growth Visualization Using ggplot2
+# Course : BCSE207P — Programming for Data Science
+# Faculty : Dr. M Rajasekhara Babu
+# ─────────────────────────────────────────────────────────────────
 
-if (!requireNamespace('ggplot2', quietly = TRUE)) install.packages('ggplot2')
-if (!requireNamespace('plotly', quietly = TRUE)) install.packages('plotly')
-library(ggplot2)
-library(plotly)
+# ── Step 1: Install and Load Required Package ────────────────────
+# install.packages("ggplot2")     # uncomment and run once
+library(ggplot2)                   # loads ggplot2 into the session
 
-# --- Step 2: Static Scatter Plot with ggplot2 ----
-# Visualize Sepal.Width (x) vs Petal.Width (y), colored by Species.
-# Storing the plot in 'static_plot' allows it to be passed to ggplotly().
-static_plot <- ggplot(data = iris,
-                      aes(x = Sepal.Width,
-                          y = Petal.Width,
-                          color = Species)) +
-  geom_point(size = 3) +
-  labs(title = "Iris: Sepal Width vs Petal Width",
-       x = "Sepal Width (cm)",
-       y = "Petal Width (cm)")
-# Display the static plot
-static_plot
+# ── Step 2: Create the Plant Growth Dataset ──────────────────────
+# Manually entered 5-observation dataset as per the problem spec
+plant_data <- data.frame(
+  Plant_ID        = c(1, 2, 3, 4, 5),
+  Growth_Rate     = c(3.2, 1.8, 2.6, 0.9, 3.8),
+  Condition_Label = c("Sunny", "Shade", "Rainy", "Drought", "Cloudy")
+)
 
-# --- Step 3: Convert to Interactive Plot with ggplotly() ----
-# ggplotly() wraps the ggplot2 object — hover, zoom, and pan enabled
-interactive_plot <- ggplotly(static_plot)
-interactive_plot
+# Verify data entry is correct before plotting
+print(plant_data)
 
-# --- Step 4: Native Plotly Scatter Plot ----
-# plot_ly() gives finer control; tilde (~) syntax maps data columns.
-# type = "scatter" with mode = "markers" produces a scatter plot.
-# layout() pipes in axis labels and tick suffix annotations.
-plot_ly(data = iris,
-        x = ~Sepal.Width,     # maps Sepal.Width column to x-axis
-        y = ~Petal.Width,     # maps Petal.Width column to y-axis
-        color = ~Species,     # distinct color per species
-        type = "scatter",
-        mode = "markers") %>%
-  layout(
-    title = "Iris Data Set Visualization",
-    xaxis = list(
-      title = "Sepal Width",
-      ticksuffix = " cm"     # appends " cm" to every x-axis tick
-    ),
-    yaxis = list(
-      title = "Petal Width",
-      ticksuffix = " cm"     # appends " cm" to every y-axis tick
-    )
-  )
+# ── Step 3: Scatter Plot with Styled Points and Condition Labels ─
+# Plant_ID    → x-axis (discrete plant identifier)
+# Growth_Rate → y-axis (continuous measurement)
+# Points are rendered in dodgerblue at size 4 for high visibility.
+# Condition labels are placed below each point (vjust = 2) in darkorange
+# so they are easy to read without overlapping the markers.
+ggplot(data = plant_data,
+       aes(x = Plant_ID, y = Growth_Rate)) +
+  # ── Styled scatter points ──────────────────────────────────────
+  geom_point(color = "dodgerblue",
+             size  = 4) +
+  # ── Condition labels below each point ─────────────────────────
+  geom_text(aes(label = Condition_Label),
+            vjust = 2,             # positive vjust pushes label downward
+            color = "darkorange") +
+  # ── Axis labels and title ──────────────────────────────────────
+  labs(title = "Scatter Plot of Plant Growth Data",
+       x     = "Plant ID",
+       y     = "Growth Rate")

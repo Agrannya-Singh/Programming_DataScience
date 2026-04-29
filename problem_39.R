@@ -1,44 +1,55 @@
-# Created by Agrannya Singh (23BCE0965)
-# Problem 39: Wide/Long Transformations using tidyr
-# Package: tidyr (>= 1.0)
+# ============================================================
+# Lab 39 - Customer-Purchase Join Analysis (E-Commerce)
+# Package: dplyr | Reg. No: 23BCE0965
 # ============================================================
 
-if (!requireNamespace('tidyr', quietly = TRUE))
-  install.packages('tidyr')
-library(tidyr)
+if (!requireNamespace('dplyr', quietly = TRUE))
+  install.packages('dplyr')
+library(dplyr)
 
-# --- PART A: Wide to Long ----
-wide_data <- data.frame(
-  ID = 1:3,
-  Year2019 = c(10, 15, 20),
-  Year2020 = c(12, 18, 24))
-cat('\n--- Original WIDE data ---\n')
-print(wide_data)
+# --- Step 1: Customers ----
+Customers <- data.frame(
+  CustomerName = c('John Doe','Jane Smith','Robert Brown',
+                   'Emily Davis','Michael Green'),
+  Email = c('john@example.com','jane@example.com','robert@example.com',
+            'emily@example.com','michael@example.com'),
+  stringsAsFactors = FALSE)
 
-long_data <- wide_data |>
-  pivot_longer(cols = c(Year2019, Year2020),
-               names_to = 'Year',
-               values_to = 'Value')
-cat('\n--- Converted to LONG format ---\n')
-print(long_data)
-cat('Rows:', nrow(long_data), ' Cols:', ncol(long_data), '\n')
+# --- Step 2: Purchases ----
+Purchases <- data.frame(
+  CustomerName = c('John Doe','Jane Smith','Robert Brown',
+                   'Sarah Johnson','Emily Davis'),
+  PurchaseAmount = c(150, 200, 120, 180, 220),
+  Date = as.Date(c('2023-01-01','2023-01-02','2023-01-03',
+                    '2023-01-04','2023-01-05')),
+  stringsAsFactors = FALSE)
 
-# --- PART B: Long to Wide ----
-long_data2 <- data.frame(
-  ID = c(1, 1, 2, 2, 3, 3),
-  Year = c('2019', '2020', '2019', '2020', '2019', '2020'),
-  Value = c(10, 12, 15, 18, 20, 24))
-cat('\n--- Original LONG data ---\n')
-print(long_data2)
+cat('\n--- Customers ---\n')
+print(Customers)
+cat('\n--- Purchases ---\n')
+print(Purchases)
 
-wide_data2 <- long_data2 |>
-  pivot_wider(names_from = 'Year',
-              values_from = 'Value')
-cat('\n--- Restored to WIDE format ---\n')
-print(wide_data2)
+# --- LEFT JOIN ----
+cat('\n=== LEFT JOIN ===\n')
+print(left_join(Customers, Purchases, by = 'CustomerName'))
 
-# --- Round-trip verification ----
-names(wide_data2) <- c('ID', 'Year2019', 'Year2020')
-cat('\n--- Round-trip check (TRUE = identical) ---\n')
-cat(isTRUE(all.equal(as.data.frame(wide_data),
-                     as.data.frame(wide_data2))), '\n')
+# --- RIGHT JOIN ----
+cat('\n=== RIGHT JOIN ===\n')
+print(right_join(Customers, Purchases, by = 'CustomerName'))
+
+# --- INNER JOIN ----
+cat('\n=== INNER JOIN ===\n')
+inner <- inner_join(Customers, Purchases, by = 'CustomerName')
+print(inner)
+
+# --- FULL OUTER JOIN ----
+cat('\n=== FULL OUTER JOIN ===\n')
+print(full_join(Customers, Purchases, by = 'CustomerName'))
+
+# --- Rank top spenders ----
+cat('\n=== Top Spenders (from inner join) ===\n')
+print(inner |>
+  arrange(desc(PurchaseAmount)) |>
+  mutate(Rank = row_number()) |>
+  select(Rank, CustomerName, PurchaseAmount, Date))
+cat(sprintf('Average purchase: $%.2f\n', mean(Purchases$PurchaseAmount)))

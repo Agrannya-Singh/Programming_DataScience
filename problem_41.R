@@ -1,72 +1,69 @@
-# Created by Agrannya Singh (23BCE0965)
-# Problem 41: Database Querying with dbplyr and RSQLite
+# ============================================================
+# Lab 41 - Reshaping and Cleaning with tidyr Key Functions
+# Packages: tidyr, dplyr | Reg. No: 23BCE0965
+# ============================================================
 
-if (!requireNamespace('DBI', quietly = TRUE)) install.packages('DBI')
-if (!requireNamespace('RSQLite', quietly = TRUE)) install.packages('RSQLite')
-if (!requireNamespace('dplyr', quietly = TRUE)) install.packages('dplyr')
-if (!requireNamespace('dbplyr', quietly = TRUE)) install.packages('dbplyr')
-library(DBI)
-library(RSQLite)
-library(dplyr)
-library(dbplyr)
-
-# --- Step 1: Create in-memory SQLite database with sample data ----
-con <- dbConnect(RSQLite::SQLite(), ":memory:")
-
-# Create songs table with sample data
-songs_df <- data.frame(
-  id = 1:20,
-  title = c('Bohemian Rhapsody', 'We Will Rock You', 'We Are The Champions',
-            'Somebody To Love', 'Dont Stop Me Now', 'Under Pressure',
-            'Radio Gaga', 'I Want To Break Free', 'Killer Queen',
-            'Another One Bites The Dust', 'Stairway To Heaven',
-            'Hotel California', 'Imagine', 'Yesterday', 'Hey Jude',
-            'Let It Be', 'Come Together', 'Thriller', 'Beat It', 'Billie Jean'),
-  artist_id = c(11, 11, 11, 11, 11, 11, 11, 11, 11, 11,
-                12, 13, 14, 15, 15, 15, 15, 16, 16, 16),
-  stringsAsFactors = FALSE
-)
-dbWriteTable(con, 'songs', songs_df)
-
-# --- Step 3: Inspect tables ----
-available <- dbListTables(con)
-cat('Tables:', paste(available, collapse = ', '), '\n')
-if (!'songs' %in% available) {
-  dbDisconnect(con); stop('Table songs not found.')
+for (pkg in c('tidyr', 'dplyr')) {
+  if (!requireNamespace(pkg, quietly = TRUE))
+    install.packages(pkg)
+  library(pkg, character.only = TRUE)
 }
 
-# --- Step 4: Lazy tbl reference ----
-songs_tbl <- tbl(con, 'songs')
-cat('Columns:', paste(colnames(songs_tbl), collapse = ', '), '\n')
+# --- Build messy dataset ----
+messy <- data.frame(
+  StudentID = 1:4,
+  Name = c('Alice','Bob','Charlie','Dana'),
+  Math_2020 = c(85, 90, NA, 70),
+  Math_2021 = c(88, NA, 78, 75),
+  Eng_2020 = c(80, 92, 85, NA),
+  Eng_2021 = c(82, 95, NA, 77),
+  ExtraInfo = c('A-2020-S1','B-2021-S2','C-2020-S1', NA),
+  stringsAsFactors = FALSE)
+cat('\n--- Original messy data ---\n')
+print(messy)
 
-# --- Step 5: Build and show query ----
-ARTIST_ID <- 11L  # Queen
-queen_query <- songs_tbl |>
-  filter(artist_id == ARTIST_ID) |>
-  select(title, artist_id)
-cat('\n=== Generated SQL ===\n')
-show_query(queen_query)
+# --- Step 1: pivot_longer ----
+long1 <- messy |>
+  pivot_longer(cols = Math_2020:Eng_2021,
+               names_to = 'SubjectYear',
+               values_to = 'Score')
+cat('\n--- After pivot_longer() ---\n')
+print(long1)
 
-# --- Step 6: Collect results ----
-queen_songs <- queen_query |> collect()
-cat('\n=== Queen Songs (artist_id =', ARTIST_ID, ') ===\n')
-print(queen_songs)
-cat('Total:', nrow(queen_songs), 'songs\n')
+# --- Step 2: separate SubjectYear ----
+long2 <- long1 |>
+  separate(col = 'SubjectYear', into = c('Subject','Year'), sep = '_')
+cat('\n--- After separate() ---\n')
+print(long2)
 
-# --- Step 7: Aggregate - top 10 artists ----
-cat('\n=== Top 10 Artists by Song Count ===\n')
-print(songs_tbl |>
-  group_by(artist_id) |>
-  summarise(song_count = n(), .groups = 'drop') |>
-  arrange(desc(song_count)) |>
-  head(10) |> collect())
+# --- Step 3: drop_na ----
+long3 <- long2 |> drop_na(Score)
+cat('\n--- After drop_na(): rows =', nrow(long3), '---\n')
+print(long3)
 
-# --- Step 8: Raw SQL alternative ----
-sql <- paste('SELECT title, artist_id FROM songs',
-             'WHERE artist_id =', ARTIST_ID, 'ORDER BY title ASC')
-cat('\n=== Raw SQL Result ===\n')
-print(dbGetQuery(con, sql))
+# --- Step 4: separate ExtraInfo ----
+extra <- messy |> drop_na(ExtraInfo) |>
+  separate('ExtraInfo', into = c('Initial','InfoYear','Section'), sep = '-')
+print(extra[, c('StudentID','Name','Initial','InfoYear','Section')])
 
-# --- Step 9: Disconnect ----
-dbDisconnect(con)
-cat('Connection closed.\n')
+# --- Step 5: pivot_wider ----
+wide2 <- long3 |>
+  pivot_wider(names_from = 'Year',
+              values_from = 'Score')
+cat('\n--- After pivot_wider() ---\n')
+print(wide2)
+
+# --- Step 6: unite ----
+united <- wide2 |> unite(col = 'Name_Subject', Name, Subject, sep = '_')
+cat('\n--- After unite() ---\n')
+print(united)
+
+# --- Step 7: fill ----
+att <- data.frame(
+  StudentID = c(1, 1, 1, 2, 2, 2),
+  Subject = c('Math','Eng','Science','Math','Eng','Science'),
+  Attendance = c(90, NA, NA, 85, NA, 92))
+att_filled <- att |> group_by(StudentID) |>
+  fill(Attendance, .direction = 'down') |> ungroup()
+cat('\n--- After fill() ---\n')
+print(att_filled)

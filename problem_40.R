@@ -1,69 +1,44 @@
-# Created by Agrannya Singh (23BCE0965)
-# Problem 40: Reshaping and Cleaning with tidyr Key Functions
+# ============================================================
+# Lab 40 - Wide/Long Transformations using tidyr
+# Package: tidyr (>= 1.0) | Reg. No: 23BCE0965
+# ============================================================
 
 if (!requireNamespace('tidyr', quietly = TRUE))
   install.packages('tidyr')
-if (!requireNamespace('dplyr', quietly = TRUE))
-  install.packages('dplyr')
 library(tidyr)
-library(dplyr)
 
-# --- Step 0: Create messy dataset ----
-messy <- data.frame(
-  StudentID = 1:4,
-  Name = c('Alice', 'Bob', 'Charlie', 'Diana'),
-  Math_2020 = c(85, 90, NA, 78),
-  Math_2021 = c(88, 92, 80, 82),
-  Eng_2020 = c(75, NA, 85, 90),
-  Eng_2021 = c(80, 88, 87, 92),
-  ExtraInfo = c('A-2020-Sec1', 'B-2020-Sec2', NA, 'D-2021-Sec1'),
-  stringsAsFactors = FALSE
-)
-cat('--- Messy data ---\n')
-print(messy)
+# --- PART A: Wide to Long ----
+wide_data <- data.frame(
+  ID = 1:3,
+  Year2019 = c(10, 15, 20),
+  Year2020 = c(12, 18, 24))
+cat('\n--- Original WIDE data ---\n')
+print(wide_data)
 
-# --- Step 1: pivot_longer ----
-long1 <- messy |>
-  pivot_longer(cols = Math_2020:Eng_2021,
-               names_to = 'SubjectYear',
-               values_to = 'Score')
-cat('\n--- After pivot_longer() ---\n')
-print(long1)
+long_data <- wide_data |>
+  pivot_longer(cols = c(Year2019, Year2020),
+               names_to = 'Year',
+               values_to = 'Value')
+cat('\n--- Converted to LONG format ---\n')
+print(long_data)
+cat('Rows:', nrow(long_data), ' Cols:', ncol(long_data), '\n')
 
-# --- Step 2: separate SubjectYear ----
-long2 <- long1 |>
-  separate(col = 'SubjectYear', into = c('Subject', 'Year'), sep = '_')
-cat('\n--- After separate() ---\n')
-print(long2)
+# --- PART B: Long to Wide ----
+long_data2 <- data.frame(
+  ID = c(1, 1, 2, 2, 3, 3),
+  Year = c('2019','2020','2019','2020','2019','2020'),
+  Value = c(10, 12, 15, 18, 20, 24))
+cat('\n--- Original LONG data ---\n')
+print(long_data2)
 
-# --- Step 3: drop_na ----
-long3 <- long2 |> drop_na(Score)
-cat('\n--- After drop_na(): rows =', nrow(long3), '---\n')
-print(long3)
-
-# --- Step 4: separate ExtraInfo ----
-extra <- messy |> drop_na(ExtraInfo) |>
-  separate('ExtraInfo', into = c('Initial', 'InfoYear', 'Section'), sep = '-')
-print(extra[, c('StudentID', 'Name', 'Initial', 'InfoYear', 'Section')])
-
-# --- Step 5: pivot_wider ----
-wide2 <- long3 |>
+wide_data2 <- long_data2 |>
   pivot_wider(names_from = 'Year',
-              values_from = 'Score')
-cat('\n--- After pivot_wider() ---\n')
-print(wide2)
+              values_from = 'Value')
+cat('\n--- Restored to WIDE format ---\n')
+print(wide_data2)
 
-# --- Step 6: unite ----
-united <- wide2 |> unite(col = 'Name_Subject', Name, Subject, sep = '_')
-cat('\n--- After unite() ---\n')
-print(united)
-
-# --- Step 7: fill ----
-att <- data.frame(
-  StudentID = c(1, 1, 1, 2, 2, 2),
-  Subject = c('Math', 'Eng', 'Science', 'Math', 'Eng', 'Science'),
-  Attendance = c(90, NA, NA, 85, NA, 92))
-att_filled <- att |> group_by(StudentID) |>
-  fill(Attendance, .direction = 'down') |> ungroup()
-cat('\n--- After fill() ---\n')
-print(att_filled)
+# --- Round-trip verification ----
+names(wide_data2) <- c('ID', 'Year2019', 'Year2020')
+cat('\n--- Round-trip check (TRUE = identical) ---\n')
+cat(isTRUE(all.equal(as.data.frame(wide_data),
+                     as.data.frame(wide_data2))), '\n')

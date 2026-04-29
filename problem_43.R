@@ -1,67 +1,60 @@
-# Created by Agrannya Singh (23BCE0965)
-# Problem 43: Basic ggplot2 Visualizations (Scatter, Line, Bar)
+# ============================================================
+# Lab 43 - Managing Product Inventory Using JSON Files
+# Package: jsonlite | Reg. No: 23BCE0965
+# ============================================================
 
-if (!requireNamespace('ggplot2', quietly = TRUE)) install.packages('ggplot2')
-library(ggplot2)
+if (!requireNamespace('jsonlite', quietly = TRUE))
+  install.packages('jsonlite')
+library(jsonlite)
 
-# --- Step 1: Create sample dataset ----
-data <- data.frame(
-  a = c(1, 2, 3, 4, 5),
-  b = c(2, 4, 1, 5, 3),
-  label = c('P1', 'P2', 'P3', 'P4', 'P5'),
-  stringsAsFactors = FALSE
-)
-# Verify the dataset before plotting
-print(data)
+input_file <- 'inventory.json'
+output_file <- 'updated_inventory.json'
 
-# --- Step 3.1.1: Basic Scatter Plot ----
-# Plots 'a' on x-axis and 'b' on y-axis with default points
-ggplot(data = data, aes(x = a, y = b)) +
-  geom_point() +
-  labs(title = "Scatter Plot",
-       x = "X-axis",
-       y = "Y-axis")
+# --- Step 1: Auto-create sample if file absent ----
+if (!file.exists(input_file)) {
+  sample <- list(products = list(
+    list(id = 1, name = 'Laptop',     category = 'Electronics', price = 999.99, stock = 50),
+    list(id = 2, name = 'Keyboard',   category = 'Electronics', price = 79.99,  stock = 200),
+    list(id = 3, name = 'Desk Chair', category = 'Furniture',   price = 299.99, stock = 30),
+    list(id = 4, name = 'Monitor',    category = 'Electronics', price = 399.99, stock = 75),
+    list(id = 5, name = 'Notebook',   category = 'Stationery',  price = 4.99,   stock = 500)))
+  write_json(sample, input_file, pretty = TRUE, auto_unbox = TRUE)
+  cat('Sample inventory.json created.\n')
+}
 
-# --- Step 3.1.2: Scatter Plot with Color Customization ----
-# Forest-green points sized at 1 — subtle but distinguishable
-ggplot(data = data, aes(x = a, y = b)) +
-  geom_point(color = "forestgreen", size = 1) +
-  labs(title = "Scatter Plot with Color Customization",
-       x = "X-axis",
-       y = "Y-axis")
+# --- Step 2: Read existing inventory ----
+inventory <- fromJSON(input_file, simplifyDataFrame = TRUE)
+cat('\n=== Current Inventory ===\n')
+print(inventory$products)
 
-# --- Step 3.1.3: Scatter Plot with Text Labels ----
-# vjust = -1 lifts the label above each point to avoid overlap
-ggplot(data = data, aes(x = a, y = b)) +
-  geom_point(color = "forestgreen", size = 3) +
-  geom_text(aes(label = label), vjust = -1, color = "blue") +
-  labs(title = "Scatter Plot with Text Labels",
-       x = "X-axis",
-       y = "Y-axis")
+# --- Step 3: Add new product ----
+max_id <- max(inventory$products$id, na.rm = TRUE)
+new_product <- data.frame(
+  id = max_id + 1L, name = 'Wireless Mouse',
+  category = 'Electronics', price = 49.99, stock = 150L,
+  stringsAsFactors = FALSE)
+cat('\n=== New Product ===\n')
+print(new_product)
+inventory$products <- rbind(inventory$products, new_product)
 
-# --- Step 3.1.4: Scatter Plot with Linear Smoothing Line ----
-# method = "lm" → linear regression line
-# se = FALSE → hide the grey confidence-band shading
-ggplot(data = data, aes(x = a, y = b)) +
-  geom_point(color = "forestgreen", size = 1) +
-  geom_smooth(method = "lm", se = FALSE) +
-  labs(title = "Scatter Plot with Smooth Line",
-       x = "X-axis",
-       y = "Y-axis")
+# --- Step 4: Write updated inventory ----
+write_json(inventory, output_file, pretty = TRUE, auto_unbox = TRUE)
+cat('\nWritten to:', output_file, '\n')
 
-# --- Step 3.2: Customised Line Plot ----
-# linewidth replaces the deprecated 'size' argument for lines
-ggplot(data = data, aes(x = a, y = b)) +
-  geom_line(color = "red", linewidth = 1) +
-  labs(title = "Line Plot",
-       x = "X-axis",
-       y = "Y-axis")
+# --- Step 5: Verify by re-reading ----
+verified <- fromJSON(output_file, simplifyDataFrame = TRUE)
+cat('\n=== Verified Contents ===\n')
+print(verified$products)
 
-# --- Step 3.3: Customised Bar Plot ----
-# stat = "identity" uses the actual 'b' values as bar heights
-# fill = "blue" applies a uniform blue color to all bars
-ggplot(data = data, aes(x = a, y = b)) +
-  geom_bar(stat = "identity", fill = "blue") +
-  labs(title = "Bar Plot",
-       x = "X-axis",
-       y = "Values")
+# --- Step 6: Summary statistics ----
+prods <- verified$products
+cat(sprintf('\nTotal products : %d\n', nrow(prods)))
+cat(sprintf('Total stock    : %d units\n', sum(prods$stock)))
+cat(sprintf('Avg price      : $%.2f\n', mean(prods$price)))
+cat(sprintf('Most expensive : %s ($%.2f)\n',
+            prods$name[which.max(prods$price)], max(prods$price)))
+cat(sprintf('Cheapest       : %s ($%.2f)\n',
+            prods$name[which.min(prods$price)], min(prods$price)))
+cat('\n=== Stock by Category ===\n')
+sb <- aggregate(stock ~ category, data = prods, FUN = sum)
+print(sb[order(-sb$stock), ])
