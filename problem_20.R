@@ -1,4 +1,4 @@
-# Created by Agrannya Singh (23 BCE0965)
+# Created by Agrannya Singh(23BCE0965)
 temps_c <- c(0, 20, 25, 30, 35, 40)
 # 1. Convert
 # Formula applies to every element in the vector simultaneously

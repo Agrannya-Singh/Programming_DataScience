@@ -1,9 +1,9 @@
-# Created by Agrannya Singh (23 BCE0965)
+# Created by Agrannya Singh(23BCE0965)
 # Function Definition
 make_full_name <- function(first_name, last_name) {
 # paste() joins strings with a space separator by default
 full_name
-<paste (first_name,
+<paste(first_name,
 last_name)
 return(full_name)
 }

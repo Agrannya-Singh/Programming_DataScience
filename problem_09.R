@@ -1,4 +1,4 @@
-# Created by Agrannya Singh (23 BCE0965)
+# Created by Agrannya Singh(23BCE0965)
 # Function Definition
 calculate_square <- function(number) {
 # Returns the number multiplied by itself

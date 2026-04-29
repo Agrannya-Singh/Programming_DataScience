@@ -1,7 +1,7 @@
-# Created by Agrannya Singh (23 BCE0965)
+# Created by Agrannya Singh(23BCE0965)
 numbers <- c(5, 3, 8, 3, 9, 5, 2, 8)
 # 1. Unique
-cat("Unique :", unique (numbers), "\n")
+cat("Unique :", unique(numbers), "\n")
 # 2. Identify Duplicates
 # duplicated () returns boolean vector.
 cat("Duplicated v alues :", numbers[ duplicated (numbers)], "\n")

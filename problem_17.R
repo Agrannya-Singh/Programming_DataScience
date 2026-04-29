@@ -1,4 +1,4 @@
-# Created by Agrannya Singh (23BCE0965)
+# Created by Agrannya Singh(23BCE0965)
 # Problem 17: Armstrong Number Checker
 
 is_armstrong <- function(num) {

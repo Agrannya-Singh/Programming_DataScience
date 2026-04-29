@@ -1,5 +1,5 @@
-# Created by Agrannya Singh (23 BCE0965)
-tasks <- list ()
+# Created by Agrannya Singh(23BCE0965)
+tasks <- list()
 add_task <- function(task) {
 # Default status is Pending
 tasks [[ task ]] <<- " Pending "

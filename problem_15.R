@@ -1,10 +1,10 @@
-# Created by Agrannya Singh (23 BCE0965)
+# Created by Agrannya Singh(23BCE0965)
 generate_fibonacci <- function(n) {
 # Error handling for non - positive inputs
 if (n <= 0) return(" Please enter positive integer")
 if (n == 1) return(0)
 # Initialize vector
-fib <- nu meric (n)
+fib <- nu meric(n)
 fib [1] <- 0
 fib [2] <- 1
 # Loop from 3 to n
@@ -13,6 +13,6 @@ fib [ i] <- fib [ i -1] + fib [ i -2]
 }
 return(fib)
 }
-# --- Driver Code / Test Cases --cat("5 terms: ", generate_fibonacci (5), "\n")
-cat("10 terms: ", generate_fibonacci (10), "\n")
-cat("20 terms: ", generate_fibonacci (20), "\n")
+# --- Driver Code / Test Cases --cat("5 terms: ", generate_fibonacci(5), "\n")
+cat("10 terms: ", generate_fibonacci(10), "\n")
+cat("20 terms: ", generate_fibonacci(20), "\n")

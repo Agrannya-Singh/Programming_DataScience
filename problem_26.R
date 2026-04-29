@@ -1,6 +1,6 @@
-# Created by Agrannya Singh (23 BCE0965)
-# Initia lize Global List
-shopping_list <- list ()
+# Created by Agrannya Singh(23BCE0965)
+# Initialize Global List
+shopping_list <- list()
 # Add Function
 add_item <- function(item) {
 # Use < <- to modify global variable
@@ -14,7 +14,7 @@ shopping_list <<- shopping_list[ shopping_list ! = item ]
 # --- Driver Code --add_item (" Apples ")
 add_item (" Milk")
 remove_item (" Apples")
-cat("Current List :", unlist (shopping_list), "\n")
+cat("Current List :", unlist(shopping_list), "\n")
 Snap
 Explanation
 & Inference
@@ -41,8 +41,8 @@ Remove grades: Create a function to remove student names and grades
 from the list.
 Calculate average: Create a function to calculate the average grade of the
 students.
-# Created by Agrannya Singh (23 BCE0965)
-grades <- list ()
+# Created by Agrannya Singh(23BCE0965)
+grades <- list()
 add_grade <- function(name, grade) {
 #
 Add
@@ -55,7 +55,7 @@ remove_grade <- function(name) {
 grades [[ name ]] <<- NULL
 }
 calc_avg <- function() {
-return(mean (unlist (grades)))
+return(mean(unlist(grades)))
 }
 # --- Driver Code --add_grade (" Alice ", 90)
 add_grade (" Bob ", 85)

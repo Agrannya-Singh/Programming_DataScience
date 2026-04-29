@@ -1,6 +1,6 @@
-# Created by Agrannya Singh (23 BCE0965)
+# Created by Agrannya Singh(23BCE0965)
 # Problem 16: Leap Year Check
-# Created by Agrannya Singh (23BCE0965)
+# Created by Agrannya Singh(23BCE0965)
 # Function Definition
 is_leap_year <- function(year) {
 # Logic: (Divisible by 4 AND NOT 100) OR (Divisible by 400)
